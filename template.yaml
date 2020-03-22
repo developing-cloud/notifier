@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: An AWS Lambda function for sending notifications
+Parameters:
+  envType:
+    Type: String
+Resources:
+  notifier:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Sub notifier-${envType}
+  lambdaNotifier:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub notifier-${envType}
+      Handler: notifier.lambda_handler
+      Runtime: python3.8
+      CodeUri: .
+      MemorySize: 256
+      Timeout: 30
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/notifier-lambda-execution-role
+      Environment:
+        Variables:
+          SNS_ARN: !Ref notifier
